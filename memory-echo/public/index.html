@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Memory Echo: Ghost Threads of a Hypervisor</title>
+  <link rel="icon" href="/static/hero.svg"/>
+  <link rel="stylesheet" href="/static/styles.css"/>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <img src="/static/hero.svg" alt="Ghost Hypervisor" class="hero"/>
+      <h1>Memory Echo: <em>Ghost Threads of a Hypervisor</em></h1>
+      <p class="tag">Forensics · Alto · Puerto 8105 → 80</p>
+      <p class="motto">“In echoes of memory, hypervisors leave ghosts.”</p>
+    </header>
+
+    <section class="card">
+      <h2>Descripción</h2>
+      <p>Recupera secretos desde un snapshot parcial de una VM con KVM. Reconstruye tablas de segundo nivel (EPT/NPT), identifica restos de <code>hypercall</code> y analiza el área tipo TLB para exfiltrar la <strong>flag</strong>.</p>
+      <ul>
+        <li>Dump sintético con estructuras didácticas.</li>
+        <li>Pistas encubiertas cerca de <code>VMCALL</code>/<code>VMMCALL</code>.</li>
+        <li>¡Radare2 recomendado! (Volatility opcional).</li>
+      </ul>
+    </section>
+
+    <section class="grid">
+      <a class="btn" href="/download/mem.raw">⬇️ Descargar mem.raw</a>
+      <a class="btn ghost" href="/tools/viewer.py">🧪 Descargar viewer.py</a>
+      <a class="btn ghost" href="/tools/trap_ransom.py">🎭 Descargar trap_ransom.py</a>
+    </section>
+
+    <section class="card">
+      <h2>Reglas</h2>
+      <ul>
+        <li>No ataques la infraestructura del CTF.</li>
+        <li>No fuerza bruta. Análisis estático/dinámico permitido.</li>
+        <li>La UI “ransom” es un <em>gimmick</em> visual, sin efectos reales.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Autor: Dennis Juilland · Categoría: Forensics
+    </footer>
+  </main>
+</body>
+</html>

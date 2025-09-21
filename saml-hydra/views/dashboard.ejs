@@ -1,0 +1,32 @@
+<% layout('layout') %>
+
+<section class="grid lg:grid-cols-3 gap-8">
+  <div class="lg:col-span-2 glass rounded-2xl p-6">
+    <h2 class="text-2xl font-semibold mb-2">Panel</h2>
+    <div class="text-white/80">
+      <p><b>Usuario:</b> <code><%= user.sub %></code></p>
+      <p><b>Rol:</b> <code><%= user.role %></code></p>
+    </div>
+
+    <% if (flag) { %>
+      <div class="mt-6 p-5 rounded-xl bg-emerald-500/20 border border-emerald-400/40">
+        <div class="text-emerald-300 font-mono break-all">
+          FLAG: <%= flag %>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="mt-6 p-5 rounded-xl bg-yellow-500/10 border border-yellow-400/30 text-yellow-200">
+        No eres admin todavía… ¿y si hubiera varias firmas con distintas “cabezas”?
+      </div>
+    <% } %>
+  </div>
+
+  <div class="glass rounded-2xl p-6">
+    <h3 class="font-semibold mb-3">Pistas (públicas)</h3>
+    <ul class="space-y-2 text-sm text-white/80">
+      <li>La clave pública del SP está en <code>/static/certs/sp_public.pem</code>.</li>
+      <li>El ACS acepta <code>alg=HS256</code> y también <code>alg=none</code> (¡ay!).</li>
+      <li>El XML se parsea a JSON y se toma la <b>primera</b> Assertion (XSW 😈).</li>
+    </ul>
+  </div>
+</section>

@@ -1,0 +1,26 @@
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAML Hydra: Assertion of Many Heads</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/static/hydra.svg" />
+  <style>
+    .bg-hydra {
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.25), transparent 60%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(167,139,250,.25), transparent 60%),
+                  radial-gradient(800px 600px at 50% 110%, rgba(16,185,129,.25), transparent 60%),
+                  linear-gradient(180deg, #0b1020 0%, #0b0f1a 100%);
+    }
+    .glass {
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .shine {
+      background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.25), rgba(255,255,255,.05));
+      background-size: 200% 100%;
+      animation: shine 6s linear infinite;
+    }
+    @keyframes shine { 0% {background-position: 200% 0;} 100% {background-position: -200% 0;} }
+  </style>
+</head>

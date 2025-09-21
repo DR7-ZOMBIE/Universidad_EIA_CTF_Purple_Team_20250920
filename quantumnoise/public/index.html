@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>QuantumNoise: Entropy Betrayed</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>">
+<link rel="stylesheet" href="/static/styles.css"/>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-slate-100 min-h-screen overflow-x-hidden">
+
+<!-- Fondo cuántico -->
+<canvas id="orb" class="fixed inset-0 -z-10"></canvas>
+<div class="fixed inset-0 -z-20 bg-[radial-gradient(1200px_600px_at_10%_-10%,rgba(56,189,248,.15),transparent_60%),radial-gradient(1000px_600px_at_90%_10%,rgba(167,139,250,.12),transparent_60%),radial-gradient(1000px_1000px_at_50%_120%,rgba(34,197,94,.08),transparent_60%)]"></div>
+
+<header class="max-w-6xl mx-auto px-4 py-8">
+  <h1 class="text-4xl md:text-6xl font-black tracking-tight">
+    <span class="text-cyan-300">Quantum</span><span class="text-fuchsia-300">Noise</span>
+    <span class="text-slate-400 text-2xl md:text-3xl block">Entropy Betrayed</span>
+  </h1>
+  <p class="mt-3 text-slate-300">Even true randomness hides a biased whisper.</p>
+</header>
+
+<main class="max-w-6xl mx-auto px-4 grid lg:grid-cols-2 gap-8 items-start">
+  <!-- Panel izquierda: dataset + metadata -->
+  <section class="p-6 rounded-2xl bg-white/5 shadow-lg ring-1 ring-white/10 backdrop-blur">
+    <h2 class="text-2xl font-bold mb-4">Dataset & Metadata</h2>
+    <div id="meta" class="text-sm text-slate-300 mb-4">Cargando metadata…</div>
+    <div class="flex flex-wrap gap-3">
+      <a href="/download/qrng.bin" class="btn">⬇️ Descargar qrng.bin</a>
+      <button id="hintBtn" class="btn-secondary">💡 Ver hint Fourier</button>
+    </div>
+    <pre id="hint" class="mt-4 hidden p-4 rounded-xl bg-black/50 text-cyan-200 text-xs overflow-auto"></pre>
+  </section>
+
+  <!-- Panel derecha: Verificador -->
+  <section class="p-6 rounded-2xl bg-white/5 shadow-lg ring-1 ring-white/10 backdrop-blur">
+    <h2 class="text-2xl font-bold mb-4">Verificador de Clave</h2>
+    <p class="text-sm text-slate-300 mb-4">Ingresa <b>128 bits</b> (0/1) o un <b>key_hex</b> (32 hex, AES-128) para desencriptar la flag.</p>
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-sm mb-1">128 bits</label>
+        <textarea id="bits" class="field h-28" placeholder="Ej: 10110… (128 chars)"></textarea>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex-1">
+          <label class="block text-sm mb-1">key_hex (opcional)</label>
+          <input id="keyhex" class="field" placeholder="32 hex (16 bytes)"/>
+        </div>
+        <button id="submit" class="btn">🔓 Desencriptar</button>
+      </div>
+      <div id="result" class="text-sm mt-2"></div>
+      <div class="text-xs text-slate-400">
+        Consejo: mapea bits a ±1, FFT/correlación contra sinusoides k=1..128, toma <i>sign</i> para cada k.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="max-w-6xl mx-auto px-4 py-12 text-slate-500 text-sm">
+  © QuantumNoise — CTF Misc | Dennis Juilland
+</footer>
+
+<script>
+const $ = sel => document.querySelector(sel);
+
+async function loadMeta() {
+  const r = await fetch('/api/metadata'); const j = await r.json();
+  $('#meta').innerHTML = `
+    <div><b>Bits</b>: ${j.n_bits}</div>
+    <div><b>IV</b> (hex): <code>${j.iv_hex}</code></div>
+    <div><b>Cipher Len</b>: ${j.cipher_len} bytes</div>`;
+  const hintTxt =
+`Hint Fourier:
+- Convierte el stream a ±1: x[n] = 1 si bit=1; -1 si bit=0
+- Para k = 1..128 calcula S_k = sum_n x[n] * sin(2π k n / N)
+- Toma b_k = 1 si S_k > 0; en otro caso 0
+- Concatena b_1..b_128 → key_bits → AES-128-CTR (iv en metadata)
+- También puedes empaquetar key_bits a 16 bytes (LSB-first) y enviarla como key_hex.
+`;
+  $('#hint').textContent = hintTxt;
+}
+
+$('#hintBtn').onclick = () => {
+  $('#hint').classList.toggle('hidden');
+};
+
+$('#submit').onclick = async () => {
+  const bits = $('#bits').value.trim().replace(/\s+/g,'');
+  const key_hex = $('#keyhex').value.trim();
+  const payload = {};
+  if (bits.length) payload.bits = bits;
+  if (key_hex.length) payload.key_hex = key_hex;
+
+  const r = await fetch('/api/submit', {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const j = await r.json();
+  if (j.ok) {
+    $('#result').innerHTML = `<span class="text-emerald-300">✅ FLAG: <b>${j.flag}</b></span>`;
+  } else {
+    const d = (j.distance !== undefined) ? ` — Hamming distance: ${j.distance}` : '';
+    $('#result').innerHTML = `<span class="text-rose-300">❌ Incorrecto${d}</span>`;
+  }
+};
+
+loadMeta();
+
+// Canvas “qubit orb”
+const canvas = document.getElementById('orb');
+const ctx = canvas.getContext('2d');
+function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; }
+addEventListener('resize', resize); resize();
+
+let t=0;
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  const R = Math.min(canvas.width, canvas.height)*0.23;
+  // glow sphere
+  const g=ctx.createRadialGradient(cx,cy,R*0.1, cx,cy,R);
+  g.addColorStop(0, 'rgba(56,189,248,0.25)');
+  g.addColorStop(0.5,'rgba(168,85,247,0.15)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.fill();
+
+  // equator lines
+  ctx.strokeStyle='rgba(56,189,248,0.6)'; ctx.lineWidth=1.2;
+  for(let i=-3;i<=3;i++){
+    const r=R*Math.cos(i*0.2);
+    ctx.beginPath();
+    for(let a=0;a<Math.PI*2;a+=0.02){
+      const x=cx + r*Math.cos(a);
+      const y=cy + r*Math.sin(a)*Math.cos((i*0.6)+t*0.8);
+      if(a===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  // precession orbit
+  const ang=t*0.9, ang2=t*1.4;
+  const x = cx + R*0.85*Math.cos(ang)*Math.cos(ang2*0.5);
+  const y = cy + R*0.6*Math.sin(ang2);
+  ctx.fillStyle='rgba(34,197,94,0.9)';
+  ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+
+  t+=0.016;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

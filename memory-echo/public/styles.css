@@ -1,0 +1,13 @@
+:root { --bg:#0b1020; --ink:#eaf2ff; --mut:#9bb2d0; --card:#121a30; --acc:#5ad1ff; }
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 ui-sans-serif,system-ui}
+.wrap{max-width:960px;margin:40px auto;padding:0 16px}
+.hero{width:72px;height:72px;filter:drop-shadow(0 0 16px rgba(90,209,255,.35))}
+h1{font-size:32px;margin:12px 0}
+.tag{color:var(--mut)}
+.motto{color:#b3c8ff;margin-top:4px}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);padding:18px 18px;border-radius:14px;margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
+.btn{display:block;text-align:center;background:var(--acc);color:#001018;text-decoration:none;padding:12px;border-radius:10px;font-weight:700}
+.btn.ghost{background:transparent;border:1px solid var(--acc);color:var(--acc)}
+footer{margin:24px 0;color:var(--mut)}
+code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:6px}
