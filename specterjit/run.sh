@@ -1,45 +1,45 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-IMAGE="specterjit"
-NAME="specterjit"
-HOST_PORT="${HOST_PORT:-8102}"
-CONT_PORT="${CONT_PORT:-8001}"
-
-# Token esperado por el servidor (64-bit hex)
-EXPECTED_TOKEN_DEFAULT=""
-
-# <<< FLAG embebida aquí >>>
-FLAG_DEFAULT='EIAPT{efe46620da6f12021181d9c0d7126069c8ef7ed6d7c928b54ee05a48bcc632fb}'
+IMAGE="frostbite"
+NAME="frostbite"
+HOST_PORT="8102"   # cambiado a 8102 para match con solve.sh
+CONT_PORT="8000"
 
 up() {
   echo "[*] Building image..."
   docker build -t "$IMAGE" .
-
   echo "[*] Running container..."
   docker rm -f "$NAME" >/dev/null 2>&1 || true
-  docker run -d \
-    --name "$NAME" \
-    --privileged \
-    -p "${HOST_PORT}:${CONT_PORT}" \
-    --restart unless-stopped \
-    -e FLAG="${FLAG:-$FLAG_DEFAULT}" \
-    -e EXPECTED_TOKEN="${EXPECTED_TOKEN:-$EXPECTED_TOKEN_DEFAULT}" \
+  docker run -d --name "$NAME" -p "${HOST_PORT}:${CONT_PORT}" --restart unless-stopped \
+    -e PUBLIC_HOST="172.30.255.144" \
+    -e ADMIN_MSG="authorize:admin-panel" \
+    -e FLAG="EIAPT{a16005a6d088406f4e6337aa7c74c0cbc5421a0d646f0763386abd05074c1116}" \
     "$IMAGE"
-
-  echo "[+] Up at http://172.30.255.144:${HOST_PORT}  (API docs: /docs)"
-  echo "[+] Download binary:  http://172.30.255.144:${HOST_PORT}/download/specterjit"
-  echo "[+] Redeem endpoint:  POST http://172.30.255.144:${HOST_PORT}/redeem  {\"token\":\"<hex>\"}"
+  echo "[+] Up at http://172.30.255.144:${HOST_PORT}  (docs: /docs)"
 }
 
-connect() { docker exec -it "$NAME" /bin/bash; }
-reset()   { docker restart "$NAME"; }
-clean()   { docker rm -f "$NAME" || true; docker rmi "$IMAGE" || true; }
+connect() {
+  docker exec -it "$NAME" /bin/bash
+}
+
+reset() {
+  echo "[*] Restarting container..."
+  docker restart "$NAME"
+}
+
+clean() {
+  echo "[*] Stopping & removing..."
+  docker rm -f "$NAME" || true
+  echo "[*] Removing image..."
+  docker rmi "$IMAGE" || true
+}
 
 case "${1:-}" in
   up) up ;;
   connect) connect ;;
   reset) reset ;;
   clean) clean ;;
-  *) echo "Uso: $0 {up|connect|reset|clean}"; exit 1 ;;
+  *)
+    echo "Uso: $0 {up|connect|reset|clean}"; exit 1 ;;
 esac
